@@ -103,7 +103,7 @@ func runVerify(ctx context.Context, f *verifyFlags) error {
 		return err
 	}
 
-	tok, err := v.Verify(f.token)
+	tok, err := v.Verify(ctx, f.token)
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func buildVerifyChecks(f *verifyFlags) []verification.TokenCheckFunc {
 
 // checkHasEntitlements is a claims.CheckFunc factory for the entitlements claim.
 func checkHasEntitlements(required ...string) claims.CheckFunc {
-	return func(c jwt.MapClaims) error {
+	return func(_ context.Context, c jwt.MapClaims) error {
 		_, err := claims.MatchingEntitlements(c, required...)
 		return err
 	}

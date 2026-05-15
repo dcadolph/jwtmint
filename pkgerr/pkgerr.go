@@ -67,4 +67,7 @@ var (
 
 	// ErrNotReady is returned when a token is not yet usable (nbf in the future, iat in the future).
 	ErrNotReady = errors.New("not ready")
+
+	// ErrRevoked is returned when a token has been explicitly revoked by a Revoker.
+	ErrRevoked = errors.New("revoked")
 )

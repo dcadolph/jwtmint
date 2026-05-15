@@ -41,11 +41,37 @@ func ToMapClaims(v any) (jwt.MapClaims, error) {
 	return mc, nil
 }
 
-// DeepCopy returns a shallow-keyed copy of the claims.
+// DeepCopy returns a deep copy of the claims via JSON round-trip.
 //
-// Values are copied by reference. Use this when you need to mutate exp/iat/nbf without
-// touching the caller's map.
+// Use this when you need to mutate the returned map (including its slice/map values)
+// without touching the caller's map. Returns an empty map if the input is nil.
+//
+// On the rare path where JSON marshaling fails (the input contains a value json/encoding
+// rejects), DeepCopy degrades to ShallowCopy — guaranteeing a non-nil map at the cost of
+// dropping deep-copy semantics for that one call. This trade favors caller simplicity:
+// jwt.MapClaims is already a JSON-shaped value, so the failure mode is essentially
+// unreachable in practice. Hot paths that only need top-level mutations can use
+// ShallowCopy directly to avoid the JSON round-trip.
 func DeepCopy(src jwt.MapClaims) jwt.MapClaims {
+	if len(src) == 0 {
+		return jwt.MapClaims{}
+	}
+	encoded, err := json.Marshal(src)
+	if err != nil {
+		return ShallowCopy(src)
+	}
+	var dst jwt.MapClaims
+	if err := json.Unmarshal(encoded, &dst); err != nil {
+		return ShallowCopy(src)
+	}
+	return dst
+}
+
+// ShallowCopy returns a copy of the top-level keys of src; values are aliased.
+//
+// Cheap (no JSON), but mutating slice/map values in the result will leak to the source.
+// Prefer DeepCopy unless you know you only need top-level mutations.
+func ShallowCopy(src jwt.MapClaims) jwt.MapClaims {
 	dst := make(jwt.MapClaims, len(src))
 	for k, v := range src {
 		dst[k] = v

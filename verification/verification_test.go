@@ -1,6 +1,7 @@
 package verification
 
 import (
+	"context"
 	"crypto/elliptic"
 	"errors"
 	"fmt"
@@ -24,7 +25,7 @@ func TestVerifyRoundtrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewSigner: %v", err)
 	}
-	signed, _, err := signer.Sign(jwt.MapClaims{claims.KeySubject: "user-1"})
+	signed, _, err := signer.Sign(context.Background(), jwt.MapClaims{claims.KeySubject: "user-1"}, nil)
 	if err != nil {
 		t.Fatalf("Sign: %v", err)
 	}
@@ -37,7 +38,7 @@ func TestVerifyRoundtrip(t *testing.T) {
 		t.Fatalf("NewVerifier: %v", err)
 	}
 
-	tok, err := v.Verify(signed)
+	tok, err := v.Verify(context.Background(), signed)
 	if err != nil {
 		t.Fatalf("Verify: %v", err)
 	}
@@ -54,14 +55,14 @@ func TestVerifyWrongMethod(t *testing.T) {
 	_, es384Pub, _ := keys.GenerateECDSAForMethod(jwt.SigningMethodES384)
 
 	signer, _ := signing.NewSigner(jwt.SigningMethodES256, es256Priv)
-	signed, _, _ := signer.Sign(jwt.MapClaims{})
+	signed, _, _ := signer.Sign(context.Background(), jwt.MapClaims{}, nil)
 
 	v, err := NewVerifier(jwt.SigningMethodES384, es384Pub)
 	if err != nil {
 		t.Fatalf("NewVerifier: %v", err)
 	}
 
-	_, err = v.Verify(signed)
+	_, err = v.Verify(context.Background(), signed)
 	if !errors.Is(err, pkgerr.ErrParse) {
 		t.Errorf("want ErrParse, got %v", err)
 	}
@@ -73,7 +74,7 @@ func TestVerifyExtraCheck(t *testing.T) {
 
 	priv, pub, _ := keys.GenerateECDSA(elliptic.P256())
 	signer, _ := signing.NewSigner(jwt.SigningMethodES256, priv)
-	signed, _, _ := signer.Sign(jwt.MapClaims{claims.KeySubject: "user-1"})
+	signed, _, _ := signer.Sign(context.Background(), jwt.MapClaims{claims.KeySubject: "user-1"}, nil)
 
 	v, err := NewVerifier(jwt.SigningMethodES256, pub)
 	if err != nil {
@@ -92,7 +93,7 @@ func TestVerifyExtraCheck(t *testing.T) {
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
 			t.Parallel()
-			_, err := v.Verify(signed, test.Extra...)
+			_, err := v.Verify(context.Background(), signed, test.Extra...)
 			if !errors.Is(err, test.Want) {
 				t.Errorf("test %d: want %v got %v", testNum, test.Want, err)
 			}
@@ -100,14 +101,15 @@ func TestVerifyExtraCheck(t *testing.T) {
 	}
 }
 
-// TestExpiredTokenRejected ensures the parser rejects expired tokens by default.
+// TestExpiredTokenRejected ensures the parser rejects tokens past expiration + leeway.
 func TestExpiredTokenRejected(t *testing.T) {
 	t.Parallel()
 
 	priv, pub, _ := keys.GenerateECDSA(elliptic.P256())
 
 	c := jwt.MapClaims{}
-	claims.SetExpiresAt(c, time.Now().Add(time.Second))
+	// Past expiration by more than DefaultLeeway, so leeway can't save it.
+	claims.SetExpiresAt(c, time.Now().Add(-2*DefaultLeeway))
 	claims.SetIssuedAt(c, time.Now().Add(-time.Hour))
 	tok := jwt.NewWithClaims(jwt.SigningMethodES256, c)
 	signed, err := tok.SignedString(priv)
@@ -115,12 +117,28 @@ func TestExpiredTokenRejected(t *testing.T) {
 		t.Fatalf("SignedString: %v", err)
 	}
 
-	time.Sleep(1100 * time.Millisecond)
-
 	v, _ := NewVerifier(jwt.SigningMethodES256, pub)
-	_, err = v.Verify(signed)
+	_, err = v.Verify(context.Background(), signed)
 	if !errors.Is(err, pkgerr.ErrParse) {
 		t.Errorf("want ErrParse for expired token, got %v", err)
+	}
+}
+
+// TestLeewayTolerance ensures a token expiring within leeway is still accepted.
+func TestLeewayTolerance(t *testing.T) {
+	t.Parallel()
+
+	priv, pub, _ := keys.GenerateECDSA(elliptic.P256())
+
+	c := jwt.MapClaims{}
+	claims.SetExpiresAt(c, time.Now().Add(-2*time.Second))
+	claims.SetIssuedAt(c, time.Now().Add(-time.Hour))
+	tok := jwt.NewWithClaims(jwt.SigningMethodES256, c)
+	signed, _ := tok.SignedString(priv)
+
+	v, _ := NewVerifier(jwt.SigningMethodES256, pub, WithLeeway(10*time.Second))
+	if _, err := v.Verify(context.Background(), signed); err != nil {
+		t.Errorf("expected token within leeway to verify, got %v", err)
 	}
 }
 
@@ -133,7 +151,7 @@ func TestHeaderChecks(t *testing.T) {
 		jwt.SigningMethodES256, priv,
 		signing.WithStaticHeaders(map[string]any{"kid": "k1"}),
 	)
-	signed, _, _ := signer.Sign(jwt.MapClaims{})
+	signed, _, _ := signer.Sign(context.Background(), jwt.MapClaims{}, nil)
 
 	v, _ := NewVerifier(jwt.SigningMethodES256, pub)
 
@@ -153,7 +171,7 @@ func TestHeaderChecks(t *testing.T) {
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
 			t.Parallel()
-			_, err := v.Verify(signed, test.Check)
+			_, err := v.Verify(context.Background(), signed, test.Check)
 			if !errors.Is(err, test.Want) {
 				t.Errorf("test %d: want %v got %v", testNum, test.Want, err)
 			}

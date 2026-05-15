@@ -20,12 +20,15 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 
 	"github.com/dcadolph/jwtsmith/jwks"
+	"github.com/dcadolph/jwtsmith/k8s/tokenreview"
 	"github.com/dcadolph/jwtsmith/keys"
 	"github.com/dcadolph/jwtsmith/pkgerr"
 	"github.com/dcadolph/jwtsmith/refresh"
+	"github.com/dcadolph/jwtsmith/revocation"
 	"github.com/dcadolph/jwtsmith/signing"
 	"github.com/dcadolph/jwtsmith/verification"
 )
@@ -52,7 +55,57 @@ type Config struct {
 	// DefaultExpiration is the lifetime applied when /sign callers omit expires_in.
 	DefaultExpiration time.Duration
 	// AuthToken, when non-empty, must appear as "Authorization: Bearer <token>" on /sign and /refresh.
+	//
+	// Mutually exclusive with Authenticator. Provided for ergonomic single-token setups.
 	AuthToken string `json:"-"`
+
+	// Authenticator authorizes /sign and /refresh requests. When set, AuthToken is ignored.
+	//
+	// Use to plug in alternate auth schemes (e.g. Kubernetes ServiceAccount token review).
+	Authenticator Authenticator
+
+	// RefreshMaxAge bounds how old (by original iat) a refreshable token can be.
+	//
+	// nil falls back to the refresh package default (24h). A non-nil pointer is honored
+	// verbatim; in particular, &zero disables the cap entirely. Use the pointer form so
+	// "disable" is distinguishable from "use default".
+	RefreshMaxAge *time.Duration
+
+	// RefreshClaimsResolver, when set, is called during refresh to rewrite or reject claims.
+	// See refresh.ClaimsResolver. Use to drop revoked groups, deny refresh for deprovisioned
+	// users, look up the latest entitlements, etc.
+	RefreshClaimsResolver refresh.ClaimsResolver
+
+	// Revoker, when set, is consulted on every /verify (and /k8s/token-review when enabled)
+	// after signature and registered-claims validation succeed. Verify rejects revoked tokens
+	// with pkgerr.ErrRevoked.
+	//
+	// Use revocation.NewMemRevoker for single-replica deployments; implement revocation.Revoker
+	// against your shared store (Redis, etcd, database) for multi-replica fleets.
+	Revoker revocation.Revoker
+
+	// AdditionalKeys are verify-only keys published in JWKS alongside the primary signing key.
+	//
+	// Use during key rotation: rotate by adding the new keypair as primary and demoting the
+	// previous keypair to AdditionalKeys until all tokens signed under it have expired.
+	// Each entry needs a distinct Kid distinct from the primary's; tokens are dispatched to
+	// the matching key by kid header.
+	AdditionalKeys []verification.KeyEntry
+
+	// EnableTokenReview opts into the /k8s/token-review endpoint that implements the
+	// Kubernetes TokenReview webhook protocol. Off by default.
+	EnableTokenReview bool
+
+	// Issuer is the URL clients should use as the OIDC issuer for this jwtsmithd instance.
+	// Used to populate /.well-known/openid-configuration. Should be the publicly-reachable
+	// scheme://host[:port] of this server (no trailing slash). Optional; when empty the
+	// discovery endpoint is not served.
+	Issuer string
+
+	// CertFile and KeyFile, when both are set, switch the server to HTTPS via http.ServeTLS.
+	// Either both or neither must be set.
+	CertFile string
+	KeyFile  string
 
 	// Addr is the listen address (host:port). Defaults to ":8080".
 	Addr string
@@ -72,6 +125,8 @@ type Server struct {
 	refresh refresh.Refresher
 	jwksSet jwks.JWKS
 	srv     *http.Server
+	metrics *metrics
+	reg     *prometheus.Registry
 }
 
 // New constructs a Server from cfg, validating the keypair and pre-building the
@@ -93,6 +148,9 @@ func New(cfg Config) (*Server, error) {
 	if err := keys.ValidatePair(cfg.PublicKey, cfg.PrivateKey); err != nil {
 		return nil, err
 	}
+	if (cfg.CertFile == "") != (cfg.KeyFile == "") {
+		return nil, fmt.Errorf("%w: CertFile and KeyFile must be set together", pkgerr.ErrInvalidValue)
+	}
 
 	cfg = cfg.withDefaults()
 
@@ -112,28 +170,41 @@ func New(cfg Config) (*Server, error) {
 		return nil, err
 	}
 
-	v, err := verification.NewVerifier(cfg.Method, cfg.PublicKey)
+	v, err := buildVerifier(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	r, err := refresh.New(cfg.Method, cfg.PublicKey, cfg.PrivateKey, cfg.DefaultExpiration)
+	refresherOpts := []refresh.Opt{}
+	if cfg.DefaultExpiration > 0 {
+		refresherOpts = append(refresherOpts, refresh.WithDefaultExpiration(cfg.DefaultExpiration))
+	}
+	if cfg.RefreshMaxAge != nil {
+		refresherOpts = append(refresherOpts, refresh.WithMaxAge(*cfg.RefreshMaxAge))
+	}
+	if cfg.RefreshClaimsResolver != nil {
+		refresherOpts = append(refresherOpts, refresh.WithClaimsResolver(cfg.RefreshClaimsResolver))
+	}
+	r, err := refresh.NewRefresher(cfg.Method, cfg.PublicKey, cfg.PrivateKey, refresherOpts...)
 	if err != nil {
 		return nil, err
 	}
 
-	jwk, err := jwks.JWKFromPublicKey(cfg.PublicKey, cfg.Kid)
+	jwksSet, err := buildJWKS(cfg)
 	if err != nil {
 		return nil, err
 	}
-	jwk.Alg = cfg.Method.Alg()
+
+	reg := prometheus.NewRegistry()
 
 	srv := &Server{
 		cfg:     cfg,
 		signer:  s,
 		verify:  v,
 		refresh: r,
-		jwksSet: jwks.JWKS{Keys: []jwks.JWK{jwk}},
+		jwksSet: jwksSet,
+		reg:     reg,
+		metrics: newMetrics(reg),
 	}
 	srv.srv = &http.Server{
 		Addr:         cfg.Addr,
@@ -172,12 +243,58 @@ func (s *Server) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", handleHealth())
-	mux.HandleFunc("GET /.well-known/jwks.json", handleJWKS(s.jwksSet))
+	mux.Handle("GET /.well-known/jwks.json", withCORS(http.HandlerFunc(handleJWKS(s.jwksSet))))
+	mux.Handle("OPTIONS /.well-known/jwks.json", withCORS(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})))
 	mux.HandleFunc("POST /verify", handleVerify(s.verify, s.cfg.Logger))
-	mux.HandleFunc("POST /sign", requireAuth(s.cfg.AuthToken, handleSign(s.signer, s.cfg)))
-	mux.HandleFunc("POST /refresh", requireAuth(s.cfg.AuthToken, handleRefresh(s.refresh)))
+	auth := s.authenticator()
+	mux.HandleFunc("POST /sign", requireAuth(auth, handleSign(s.signer, s.cfg.Logger)))
+	mux.HandleFunc("POST /refresh", requireAuth(auth, handleRefresh(s.refresh, s.cfg.Logger)))
 
-	return logRequests(s.cfg.Logger, mux)
+	if s.cfg.EnableTokenReview {
+		mux.Handle("POST /k8s/token-review", tokenreview.Handler(s.verify))
+	}
+
+	if s.cfg.Issuer != "" {
+		mux.Handle("GET /.well-known/openid-configuration", withCORS(http.HandlerFunc(handleOIDCDiscovery(s.cfg.Issuer, s.supportedAlgs()))))
+		mux.Handle("OPTIONS /.well-known/openid-configuration", withCORS(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})))
+	}
+
+	mux.Handle("GET /metrics", metricsHandler(s.reg))
+
+	tlsEnabled := s.cfg.CertFile != ""
+	return logRequests(s.cfg.Logger, instrument(s.metrics, withSecurityHeaders(tlsEnabled, mux)))
+}
+
+// authenticator returns the Authenticator to use for mutating endpoints.
+//
+// Config.Authenticator wins when set; otherwise Config.AuthToken builds a static
+// bearer authenticator; otherwise nil (no auth).
+func (s *Server) authenticator() Authenticator {
+	if s.cfg.Authenticator != nil {
+		return s.cfg.Authenticator
+	}
+	return StaticBearerAuthenticator(s.cfg.AuthToken)
+}
+
+// supportedAlgs returns the distinct alg strings the JWKS includes.
+func (s *Server) supportedAlgs() []string {
+	seen := map[string]struct{}{}
+	out := make([]string, 0, 1+len(s.cfg.AdditionalKeys))
+	add := func(alg string) {
+		if alg == "" {
+			return
+		}
+		if _, ok := seen[alg]; ok {
+			return
+		}
+		seen[alg] = struct{}{}
+		out = append(out, alg)
+	}
+	add(s.cfg.Method.Alg())
+	for _, e := range s.cfg.AdditionalKeys {
+		add(e.Method.Alg())
+	}
+	return out
 }
 
 // Run starts the server and blocks until ctx is canceled, then shuts down gracefully.
@@ -191,11 +308,19 @@ func (s *Server) Run(ctx context.Context) error {
 		zap.String("addr", ln.Addr().String()),
 		zap.String("alg", s.cfg.Method.Alg()),
 		zap.String("kid", s.cfg.Kid),
+		zap.Bool("tls", s.cfg.CertFile != ""),
+		zap.Int("additional_keys", len(s.cfg.AdditionalKeys)),
 	)
 
 	errCh := make(chan error, 1)
 	go func() {
-		if err := s.srv.Serve(ln); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		var err error
+		if s.cfg.CertFile != "" {
+			err = s.srv.ServeTLS(ln, s.cfg.CertFile, s.cfg.KeyFile)
+		} else {
+			err = s.srv.Serve(ln)
+		}
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			errCh <- err
 			return
 		}

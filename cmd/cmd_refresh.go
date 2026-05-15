@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -28,7 +29,7 @@ func newRefreshCmd() *cobra.Command {
 		Use:   "refresh [token]",
 		Short: "Refresh a JWT, preserving its lifetime window. Outputs the refreshed token to stdout.",
 		Args:  cobra.MaximumNArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			tok := token
 			if tok == "" && len(args) == 1 {
 				tok = args[0]
@@ -43,7 +44,11 @@ func newRefreshCmd() *cobra.Command {
 			if tok == "" {
 				return fmt.Errorf("%w: token required (positional arg, --token, or stdin)", ErrUsage)
 			}
-			return runRefresh(method, pubPath, privPath, tok, defaultExp)
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			return runRefresh(ctx, method, pubPath, privPath, tok, defaultExp)
 		},
 	}
 
@@ -60,7 +65,7 @@ func newRefreshCmd() *cobra.Command {
 }
 
 // runRefresh resolves the keypair, builds the refresher, and writes the rotated token.
-func runRefresh(methodName, pubPath, privPath, token string, defaultExp time.Duration) error {
+func runRefresh(ctx context.Context, methodName, pubPath, privPath, token string, defaultExp time.Duration) error {
 
 	method, err := signing.SigningMethod(methodName)
 	if err != nil {
@@ -75,12 +80,16 @@ func runRefresh(methodName, pubPath, privPath, token string, defaultExp time.Dur
 		return err
 	}
 
-	r, err := refresh.New(method, pub, priv, defaultExp)
+	opts := []refresh.Opt{}
+	if defaultExp > 0 {
+		opts = append(opts, refresh.WithDefaultExpiration(defaultExp))
+	}
+	r, err := refresh.NewRefresher(method, pub, priv, opts...)
 	if err != nil {
 		return err
 	}
 
-	_, refreshed, err := r.Refresh(token)
+	_, refreshed, err := r.Refresh(ctx, token)
 	if err != nil {
 		return err
 	}

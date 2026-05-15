@@ -1,6 +1,7 @@
 package claims
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -185,18 +186,18 @@ func TestCheckFuncs(t *testing.T) {
 		{Name: "groups match", Check: CheckHasGroups("g1"), In: good},
 		{Name: "groups miss", Check: CheckHasGroups("g2"), In: good, Want: ErrNoGroups},
 		{Name: "roles match", Check: CheckHasRoles("r1"), In: good},
-		{Name: "not expired ok", Check: CheckNotExpired(), In: good},
-		{Name: "not expired fail", Check: CheckNotExpired(), In: pastClaims(), Want: pkgerr.ErrExpired},
-		{Name: "nbf ready", Check: CheckNotBeforeReady(), In: good},
-		{Name: "nbf future", Check: CheckNotBeforeReady(), In: futureNbf(), Want: pkgerr.ErrNotReady},
-		{Name: "chain ok", Check: Chain(CheckIssuer("issuer-x"), CheckNotExpired()), In: good},
+		{Name: "not expired ok", Check: CheckNotExpired(0), In: good},
+		{Name: "not expired fail", Check: CheckNotExpired(0), In: pastClaims(), Want: pkgerr.ErrExpired},
+		{Name: "nbf ready", Check: CheckNotBeforeReady(0), In: good},
+		{Name: "nbf future", Check: CheckNotBeforeReady(0), In: futureNbf(), Want: pkgerr.ErrNotReady},
+		{Name: "chain ok", Check: Chain(CheckIssuer("issuer-x"), CheckNotExpired(0)), In: good},
 		{Name: "chain fail", Check: Chain(CheckIssuer("issuer-x"), CheckIssuer("other")), In: good, Want: pkgerr.ErrCheck},
 	}
 
 	for testNum, test := range tests {
 		t.Run(fmt.Sprintf("test %d %s", testNum, test.Name), func(t *testing.T) {
 			t.Parallel()
-			err := test.Check(test.In)
+			err := test.Check(context.Background(), test.In)
 			if !errors.Is(err, test.Want) {
 				t.Fatalf("test %d: error mismatch\nwant: %v\ngot:  %v", testNum, test.Want, err)
 			}

@@ -1,0 +1,33 @@
+# Example JWTRequest. The controller mints a JWT meeting this spec and stores it in a
+# Secret named "billing-token" in the same namespace. A workload pod can mount the
+# Secret and use the data["token"] value as a bearer token for outgoing requests.
+
+apiVersion: jwtsmith.io/v1alpha1
+kind: JWTRequest
+metadata:
+  name: billing-token
+  namespace: default
+spec:
+  secretName: billing-token
+  subject: billing-service
+  issuer: jwtsmith-controller
+  audience:
+    - api.internal
+  groups:
+    - service-accounts
+  entitlements:
+    - billing.read
+    - billing.write
+  extraClaims:
+    tenant: "acme"           # string
+    region: "us-east-1"
+    tier: 3                  # number
+    beta_features: true      # bool
+    quota:                   # nested object
+      requests_per_second: 100
+      monthly_budget_usd: 5000
+    feature_flags:           # array
+      - "fast-path"
+      - "low-latency-routing"
+  expiresIn: 1h
+  refreshThreshold: 0.25

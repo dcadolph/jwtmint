@@ -169,3 +169,69 @@ func TestRemoteHTTPError(t *testing.T) {
 		t.Errorf("want ErrRead, got %v", err)
 	}
 }
+
+// TestRemoteRespectsCacheControl confirms a server max-age smaller than the configured
+// TTL shortens the per-fetch cache lifetime.
+func TestRemoteRespectsCacheControl(t *testing.T) {
+	t.Parallel()
+
+	_, pub, _ := keys.GenerateECDSA(elliptic.P256())
+	j, _ := JWKFromPublicKey(pub, "k1")
+
+	var hits int
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		hits++
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Cache-Control", "public, max-age=1")
+		_ = json.NewEncoder(w).Encode(JWKS{Keys: []JWK{j}})
+	}))
+	defer srv.Close()
+
+	r, _ := NewRemote(srv.URL, WithTTL(time.Hour))
+
+	ctx := context.Background()
+	if _, err := r.KeySet(ctx); err != nil {
+		t.Fatalf("KeySet: %v", err)
+	}
+	time.Sleep(1100 * time.Millisecond)
+	if _, err := r.KeySet(ctx); err != nil {
+		t.Fatalf("KeySet (after server-shortened TTL): %v", err)
+	}
+	if hits != 2 {
+		t.Errorf("expected 2 fetches after server max-age elapsed, got %d", hits)
+	}
+}
+
+// TestParseCacheControlMaxAge covers the directive parser across realistic header shapes.
+func TestParseCacheControlMaxAge(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		Header string
+		Want   time.Duration
+		WantOK bool
+	}{
+		{Header: "max-age=60", Want: 60 * time.Second, WantOK: true},
+		{Header: "public, max-age=300", Want: 300 * time.Second, WantOK: true},
+		{Header: "Max-Age=42", Want: 42 * time.Second, WantOK: true},
+		{Header: "max-age=0", Want: 0, WantOK: true},
+		{Header: "no-store", Want: 0, WantOK: false},
+		{Header: "no-cache, max-age=60", Want: 0, WantOK: false},
+		{Header: "max-age=-1", Want: 0, WantOK: false},
+		{Header: "max-age=foo", Want: 0, WantOK: false},
+		{Header: "", Want: 0, WantOK: false},
+	}
+
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d %q", testNum, test.Header), func(t *testing.T) {
+			t.Parallel()
+			got, ok := parseCacheControlMaxAge(test.Header)
+			if ok != test.WantOK {
+				t.Errorf("ok: want %v got %v", test.WantOK, ok)
+			}
+			if got != test.Want {
+				t.Errorf("dur: want %v got %v", test.Want, got)
+			}
+		})
+	}
+}

@@ -1,6 +1,7 @@
 package signing
 
 import (
+	"context"
 	"crypto/elliptic"
 	"errors"
 	"fmt"
@@ -81,7 +82,7 @@ func TestSignerRoundtripPerAlgorithm(t *testing.T) {
 			if err != nil {
 				t.Fatalf("NewSigner: %v", err)
 			}
-			signed, _, err := s.Sign(jwt.MapClaims{claims.KeySubject: "user-1"})
+			signed, _, err := s.Sign(context.Background(), jwt.MapClaims{claims.KeySubject: "user-1"}, nil)
 			if err != nil {
 				t.Fatalf("Sign: %v", err)
 			}
@@ -114,7 +115,7 @@ func TestSignDefaults(t *testing.T) {
 		t.Fatalf("NewSigner: %v", err)
 	}
 
-	_, tok, err := s.Sign(nil)
+	_, tok, err := s.Sign(context.Background(), nil, nil)
 	if err != nil {
 		t.Fatalf("Sign: %v", err)
 	}
@@ -153,7 +154,7 @@ func TestSignRejectsPastExp(t *testing.T) {
 
 	c := jwt.MapClaims{}
 	claims.SetExpiresAt(c, time.Now().Add(-time.Hour))
-	_, _, err := s.Sign(c)
+	_, _, err := s.Sign(context.Background(), c, nil)
 	if !errors.Is(err, pkgerr.ErrExpired) {
 		t.Errorf("want ErrExpired, got %v", err)
 	}
@@ -186,7 +187,7 @@ func TestStaticHeadersAndClaims(t *testing.T) {
 		t.Fatalf("NewSigner: %v", err)
 	}
 
-	_, tok, err := s.Sign(jwt.MapClaims{"sub": "u1"})
+	_, tok, err := s.Sign(context.Background(), jwt.MapClaims{"sub": "u1"}, nil)
 	if err != nil {
 		t.Fatalf("Sign: %v", err)
 	}
