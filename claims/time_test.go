@@ -6,95 +6,104 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/dcadolph/jwtsmith/pkgerr"
 )
 
-// TestTimestamp tests Timestamp in various scenarios.
+// TestTimestamp tests Timestamp normalization across supported input types.
 func TestTimestamp(t *testing.T) {
-
 	t.Parallel()
 
-	testTable := []struct {
-		Input           any
-		WantNumericDate *jwt.NumericDate
-		Want            error
+	tests := []struct {
+		WantND *jwt.NumericDate
+		Want   error
+		Input  any
 	}{
-		{ // Test 0: Valid jwt.NumericDate
-			Input:           jwt.NewNumericDate(time.Unix(1609459200, 0)), // 2021-01-01 00:00:00 UTC
-			WantNumericDate: jwt.NewNumericDate(time.Unix(1609459200, 0)),
+		{ // Test 0: Valid jwt.NumericDate value.
+			Input:  *jwt.NewNumericDate(time.Unix(1609459200, 0)),
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 0)),
 		},
-		{ // Test 1: Nil *jwt.NumericDate
+		{ // Test 1: Nil *jwt.NumericDate.
 			Input: (*jwt.NumericDate)(nil),
-			Want:  ErrInvalidValue,
+			Want:  pkgerr.ErrInvalidValue,
 		},
-		{ // Test 2: Valid *jwt.NumericDate
-			Input:           jwt.NewNumericDate(time.Unix(1609459200, 0)),
-			WantNumericDate: jwt.NewNumericDate(time.Unix(1609459200, 0)),
+		{ // Test 2: Valid *jwt.NumericDate.
+			Input:  jwt.NewNumericDate(time.Unix(1609459200, 0)),
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 0)),
 		},
-		{ // Test 3: Zero-value jwt.NumericDate
+		{ // Test 3: Zero-value jwt.NumericDate.
 			Input: jwt.NumericDate{},
-			Want:  ErrInvalidValue,
+			Want:  pkgerr.ErrInvalidValue,
 		},
-		{ // Test 4: Nil *float64
+		{ // Test 4: Nil *float64.
 			Input: (*float64)(nil),
-			Want:  ErrInvalidValue,
+			Want:  pkgerr.ErrInvalidValue,
 		},
-		{ // Test 5: Valid float64
-			Input:           1609459200.123456, // 2021-01-01 00:00:00.123456 UTC
-			WantNumericDate: jwt.NewNumericDate(time.Unix(1609459200, 123456000)),
+		{ // Test 5: Valid float64 with sub-second precision.
+			Input:  1609459200.123456,
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 123456000)),
 		},
-		{ // Test 6: Invalid float64 (less than 1)
+		{ // Test 6: float64 below 1.
 			Input: 0.5,
-			Want:  ErrInvalidValue,
+			Want:  pkgerr.ErrInvalidValue,
 		},
-		{ // Test 7: Nil *time.Time
+		{ // Test 7: Nil *time.Time.
 			Input: (*time.Time)(nil),
-			Want:  ErrInvalidValue,
+			Want:  pkgerr.ErrInvalidValue,
 		},
-		{ // Test 8: Valid time.Time
-			Input:           time.Unix(1609459200, 0),
-			WantNumericDate: jwt.NewNumericDate(time.Unix(1609459200, 0)),
+		{ // Test 8: Valid time.Time.
+			Input:  time.Unix(1609459200, 0),
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 0)),
 		},
-		{ // Test 9: Zero-value time.Time
+		{ // Test 9: Zero-value time.Time.
 			Input: time.Time{},
-			Want:  ErrInvalidValue,
+			Want:  pkgerr.ErrInvalidValue,
 		},
-		{ // Test 10: Nil *int64
+		{ // Test 10: Nil *int64.
 			Input: (*int64)(nil),
-			Want:  ErrInvalidValue,
+			Want:  pkgerr.ErrInvalidValue,
 		},
-		{ // Test 11: Valid int64
-			Input:           int64(1609459200), // 2021-01-01 00:00:00 UTC
-			WantNumericDate: jwt.NewNumericDate(time.Unix(1609459200, 0)),
+		{ // Test 11: Valid int64.
+			Input:  int64(1609459200),
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 0)),
 		},
-		{ // Test 12: Valid int
-			Input:           1609459200, // 2021-01-01 00:00:00 UTC
-			WantNumericDate: jwt.NewNumericDate(time.Unix(1609459200, 0)),
+		{ // Test 12: Valid int.
+			Input:  1609459200,
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 0)),
 		},
-		{ // Test 13: Unsupported type
-			Input: "2021-01-01T00:00:00Z",
-			Want:  ErrInvalidType,
+		{ // Test 13: Valid RFC3339 string.
+			Input:  "2021-01-01T00:00:00Z",
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 0).UTC()),
+		},
+		{ // Test 14: Valid numeric string.
+			Input:  "1609459200",
+			WantND: jwt.NewNumericDate(time.Unix(1609459200, 0)),
+		},
+		{ // Test 15: Unparseable string.
+			Input: "tomorrow",
+			Want:  pkgerr.ErrInvalidValue,
+		},
+		{ // Test 16: Unsupported type.
+			Input: struct{}{},
+			Want:  pkgerr.ErrInvalidType,
 		},
 	}
 
-	for testNum, test := range testTable {
-		t.Run(fmt.Sprintf("Test %d", testNum+1), func(t *testing.T) {
-
+	for testNum, test := range tests {
+		t.Run(fmt.Sprintf("test %d", testNum), func(t *testing.T) {
 			t.Parallel()
 
 			got, err := Timestamp(test.Input)
 			if !errors.Is(err, test.Want) {
-				t.Fatalf("test %d: error mismatch\nWant: %v\nGot: %v", testNum, test.Want, err)
+				t.Fatalf("test %d: error mismatch\nwant: %v\ngot:  %v", testNum, test.Want, err)
 			}
-
-			// Nothing more to do.
 			if err != nil {
 				return
 			}
-
-			if diff := cmp.Diff(test.WantNumericDate, got); diff != "" {
-				t.Fatalf("Test %d: Timestamp() mismatch (-want +got):\n%s", testNum+1, diff)
+			if diff := cmp.Diff(test.WantND, got); diff != "" {
+				t.Fatalf("test %d: mismatch (-want +got):\n%s", testNum, diff)
 			}
 		})
 	}

@@ -1,18 +1,14 @@
 package claims
 
-import (
-	"errors"
-)
+import "errors"
 
 var (
+	// ErrNoGroups is returned when a groups-related operation finds no matching groups.
+	ErrNoGroups = errors.New("no groups")
 
-	// ErrInvalidType is returned when a type is not valid.
-	ErrInvalidType = errors.New("invalid type")
+	// ErrNoAudience is returned when an audience-related operation finds no matching audience.
+	ErrNoAudience = errors.New("no audience")
 
-	// ErrInvalidValue is returned when a value is not valid. Additional errors may
-	// be wrapped for additional context. This is distinct from ErrInvalidType.
-	ErrInvalidValue = errors.New("invalid value")
-
-	// ErrNotFound is returned when something is not found.
-	ErrNotFound = errors.New("not found")
+	// ErrNoRoles is returned when a roles-related operation finds no matching roles.
+	ErrNoRoles = errors.New("no roles")
 )
