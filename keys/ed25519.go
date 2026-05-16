@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // GenerateEd25519 generates a new Ed25519 key pair.
@@ -73,7 +73,7 @@ func ValidateEd25519Pair(publicKey ed25519.PublicKey, privateKey ed25519.Private
 		)
 	}
 
-	msg := []byte("jwtsmith Ed25519 pair validation")
+	msg := []byte("jwtmint Ed25519 pair validation")
 	sig := ed25519.Sign(privateKey, msg)
 	if !ed25519.Verify(publicKey, msg, sig) {
 		return fmt.Errorf("%w: Ed25519 public and private keys do not match", pkgerr.ErrInvalidKeyPair)

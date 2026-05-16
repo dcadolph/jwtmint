@@ -1,4 +1,4 @@
-// Package cli parses command-line flags for jwtsmithd.
+// Package cli parses command-line flags for jwtmintd.
 //
 // Kept in an internal package so the daemon's flag surface can evolve without affecting
 // importers of the httpserver package.
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dcadolph/jwtsmith/cmd/config"
+	"github.com/dcadolph/jwtmint/cmd/config"
 )
 
 // Config is the parsed daemon configuration.
@@ -116,7 +116,7 @@ func (s *stringSliceFlag) Set(v string) error {
 
 // Parse applies the daemon's flags to fs and parses args, returning the resolved Config.
 //
-// Each scalar flag falls back to a JWTSMITH_* environment variable; see config.EnvKey.
+// Each scalar flag falls back to a JWTMINT_* environment variable; see config.EnvKey.
 func Parse(fs *flag.FlagSet, args []string) (Config, error) {
 
 	var c Config
@@ -165,13 +165,13 @@ func Parse(fs *flag.FlagSet, args []string) (Config, error) {
 	c.DefaultExpiration = d
 
 	if c.Method == "" {
-		return Config{}, fmt.Errorf("--method is required (or env JWTSMITH_METHOD)")
+		return Config{}, fmt.Errorf("--method is required (or env JWTMINT_METHOD)")
 	}
 	if c.PrivPath == "" {
-		return Config{}, fmt.Errorf("--priv is required (or env JWTSMITH_PRIV)")
+		return Config{}, fmt.Errorf("--priv is required (or env JWTMINT_PRIV)")
 	}
 	if c.PubPath == "" {
-		return Config{}, fmt.Errorf("--pub is required (or env JWTSMITH_PUB)")
+		return Config{}, fmt.Errorf("--pub is required (or env JWTMINT_PUB)")
 	}
 	if (c.CertFile == "") != (c.KeyFile == "") {
 		return Config{}, fmt.Errorf("--cert and --key must be set together")

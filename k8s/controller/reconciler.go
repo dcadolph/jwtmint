@@ -29,9 +29,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	v1alpha1 "github.com/dcadolph/jwtsmith/k8s/api/v1alpha1"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/claims"
+	v1alpha1 "github.com/dcadolph/jwtmint/k8s/api/v1alpha1"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // SecretDataKey is the key under which the minted token is stored in the Secret.
@@ -217,7 +217,7 @@ func (r *JWTRequestReconciler) upsertSecret(ctx context.Context, jr *v1alpha1.JW
 		if secret.Annotations == nil {
 			secret.Annotations = map[string]string{}
 		}
-		secret.Annotations["jwtsmith.io/mintedAt"] = time.Now().UTC().Format(time.RFC3339)
+		secret.Annotations["jwtmint.io/mintedAt"] = time.Now().UTC().Format(time.RFC3339)
 		if secret.Data == nil {
 			secret.Data = map[string][]byte{}
 		}

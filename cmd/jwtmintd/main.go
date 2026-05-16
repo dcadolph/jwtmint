@@ -1,4 +1,4 @@
-// jwtsmithd is the jwtsmith HTTP daemon.
+// jwtmintd is the jwtmint HTTP daemon.
 //
 // Exposes /sign, /verify, /refresh, /.well-known/jwks.json, and /healthz so non-Go
 // services can issue and verify tokens through a single endpoint.
@@ -16,18 +16,18 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/dcadolph/jwtsmith/cmd/jwtsmithd/internal/cli"
-	"github.com/dcadolph/jwtsmith/httpserver"
-	"github.com/dcadolph/jwtsmith/httpserver/k8sauth"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/signing"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/cmd/jwtmintd/internal/cli"
+	"github.com/dcadolph/jwtmint/httpserver"
+	"github.com/dcadolph/jwtmint/httpserver/k8sauth"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/signing"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // main parses flags, builds the server, and runs it until SIGINT or SIGTERM.
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "jwtsmithd: %s\n", err)
+		fmt.Fprintf(os.Stderr, "jwtmintd: %s\n", err)
 		os.Exit(1)
 	}
 }

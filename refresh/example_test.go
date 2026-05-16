@@ -8,10 +8,10 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/refresh"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/refresh"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // ExampleNewRefresher shows a basic refresh: original window is preserved, iat/nbf/exp slid forward.

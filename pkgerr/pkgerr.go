@@ -1,4 +1,4 @@
-// Package pkgerr defines the root sentinel errors shared across jwtsmith packages.
+// Package pkgerr defines the root sentinel errors shared across jwtmint packages.
 //
 // All packages wrap these roots with fmt.Errorf("%w: ...", pkgerr.ErrFoo, ...) so callers
 // can use errors.Is to classify failures without depending on the specific package that

@@ -7,12 +7,12 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
-// BenchmarkSign measures sign throughput across the asymmetric algorithms jwtsmith supports.
+// BenchmarkSign measures sign throughput across the asymmetric algorithms jwtmint supports.
 //
 // Use as: go test -run=- -bench=BenchmarkSign -benchmem ./signing
 //

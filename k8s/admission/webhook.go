@@ -8,9 +8,9 @@ import (
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
-	v1alpha1 "github.com/dcadolph/jwtsmith/k8s/api/v1alpha1"
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
+	v1alpha1 "github.com/dcadolph/jwtmint/k8s/api/v1alpha1"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // PathValidate is the conventional path for the validating admission webhook.

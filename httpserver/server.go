@@ -1,4 +1,4 @@
-// Package httpserver exposes jwtsmith's library primitives as HTTP endpoints.
+// Package httpserver exposes jwtmint's library primitives as HTTP endpoints.
 //
 // Endpoints:
 //   POST /sign                      sign a JWT with the server's private key
@@ -23,14 +23,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"
 
-	"github.com/dcadolph/jwtsmith/jwks"
-	"github.com/dcadolph/jwtsmith/k8s/tokenreview"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/pkgerr"
-	"github.com/dcadolph/jwtsmith/refresh"
-	"github.com/dcadolph/jwtsmith/revocation"
-	"github.com/dcadolph/jwtsmith/signing"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/jwks"
+	"github.com/dcadolph/jwtmint/k8s/tokenreview"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/pkgerr"
+	"github.com/dcadolph/jwtmint/refresh"
+	"github.com/dcadolph/jwtmint/revocation"
+	"github.com/dcadolph/jwtmint/signing"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // Config holds everything needed to run the server.
@@ -96,7 +96,7 @@ type Config struct {
 	// Kubernetes TokenReview webhook protocol. Off by default.
 	EnableTokenReview bool
 
-	// Issuer is the URL clients should use as the OIDC issuer for this jwtsmithd instance.
+	// Issuer is the URL clients should use as the OIDC issuer for this jwtmintd instance.
 	// Used to populate /.well-known/openid-configuration. Should be the publicly-reachable
 	// scheme://host[:port] of this server (no trailing slash). Optional; when empty the
 	// discovery endpoint is not served.
@@ -117,7 +117,7 @@ type Config struct {
 	ShutdownTimeout time.Duration
 }
 
-// Server wraps an http.Server with the jwtsmith handler set.
+// Server wraps an http.Server with the jwtmint handler set.
 type Server struct {
 	cfg     Config
 	signer  signing.Signer
@@ -235,7 +235,7 @@ func (c Config) withDefaults() Config {
 	return c
 }
 
-// routes returns the http.Handler with all jwtsmith endpoints registered.
+// routes returns the http.Handler with all jwtmint endpoints registered.
 //
 // Uses Go 1.22+ method-aware routing.
 func (s *Server) routes() http.Handler {
@@ -304,7 +304,7 @@ func (s *Server) Run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("%w: listening on %s: %w", pkgerr.ErrInvalidValue, s.cfg.Addr, err)
 	}
-	s.cfg.Logger.Info("jwtsmithd listening",
+	s.cfg.Logger.Info("jwtmintd listening",
 		zap.String("addr", ln.Addr().String()),
 		zap.String("alg", s.cfg.Method.Alg()),
 		zap.String("kid", s.cfg.Kid),
@@ -331,7 +331,7 @@ func (s *Server) Run(ctx context.Context) error {
 	case <-ctx.Done():
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), s.cfg.ShutdownTimeout)
 		defer cancel()
-		s.cfg.Logger.Info("jwtsmithd shutting down")
+		s.cfg.Logger.Info("jwtmintd shutting down")
 		if err := s.srv.Shutdown(shutdownCtx); err != nil {
 			return fmt.Errorf("shutdown: %w", err)
 		}

@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // JWK key types per RFC 7518 section 6.
@@ -37,7 +37,7 @@ const (
 	UseEnc = "enc"
 )
 
-// JWK represents a single JSON Web Key. Only fields jwtsmith reads or writes are present;
+// JWK represents a single JSON Web Key. Only fields jwtmint reads or writes are present;
 // unknown fields are preserved by the JSON encoder when re-marshaling parsed JWKs.
 type JWK struct {
 	// Kty is the key type ("RSA", "EC", "OKP"). Required.

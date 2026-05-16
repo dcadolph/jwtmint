@@ -1,7 +1,7 @@
-// Package v1alpha1 contains API schema definitions for the jwtsmith.io v1alpha1 API group.
+// Package v1alpha1 contains API schema definitions for the jwtmint.io v1alpha1 API group.
 //
 // +kubebuilder:object:generate=true
-// +groupName=jwtsmith.io
+// +groupName=jwtmint.io
 package v1alpha1
 
 import (
@@ -10,7 +10,7 @@ import (
 )
 
 // GroupVersion is the group version used to register these objects.
-var GroupVersion = schema.GroupVersion{Group: "jwtsmith.io", Version: "v1alpha1"}
+var GroupVersion = schema.GroupVersion{Group: "jwtmint.io", Version: "v1alpha1"}
 
 // SchemeBuilder collects functions that add the v1alpha1 types to a scheme.
 var SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

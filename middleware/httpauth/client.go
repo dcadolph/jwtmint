@@ -9,13 +9,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // TokenSource produces a bearer token for outbound requests.
 //
 // Implementations are typically file-backed (Secret-mounted token) or function-backed
-// (call into an issuer like jwtsmithd's /sign on demand). Token() may block for I/O.
+// (call into an issuer like jwtmintd's /sign on demand). Token() may block for I/O.
 type TokenSource interface {
 	Token() (string, error)
 }

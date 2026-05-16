@@ -17,9 +17,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/pkgerr"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/pkgerr"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // MetadataKeyAuthorization is the metadata key inspected for the bearer token.

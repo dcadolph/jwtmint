@@ -8,8 +8,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/revocation"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/revocation"
 )
 
 // ExampleNewMemRevoker shows revoking a token by jti and confirming the verifier hook

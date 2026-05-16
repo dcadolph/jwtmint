@@ -21,7 +21,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // Revoker reports whether a parsed JWT has been revoked.

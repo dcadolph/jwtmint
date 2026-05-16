@@ -7,7 +7,7 @@ import (
 
 	authnv1 "k8s.io/api/authentication/v1"
 
-	v1alpha1 "github.com/dcadolph/jwtsmith/k8s/api/v1alpha1"
+	v1alpha1 "github.com/dcadolph/jwtmint/k8s/api/v1alpha1"
 )
 
 // TestSelfOnlyPolicy covers the canonical accept/reject paths.

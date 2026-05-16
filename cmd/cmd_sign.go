@@ -10,8 +10,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/cobra"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // signFlags holds every flag for the sign command. Grouped here so other helpers

@@ -1,4 +1,4 @@
-# jwtsmith
+# jwtmint
 
 A JWT toolkit for Go: a library, a daemon, a Kubernetes controller, an admission
 webhook, and HTTP/gRPC middleware. Built around the `golang-jwt/jwt/v5` parser, with
@@ -25,7 +25,7 @@ start once the surface stabilizes.
 - `keys/` — keypair generation, validation, and `Keyfunc` adapters.
 - `jwks/` — local `KeySet`, `JWK`/`JWKS` types, and `Remote` (cached fetch with negative
   caching and Cache-Control honoring).
-- `httpserver/` — `jwtsmithd` daemon: `/sign`, `/verify`, `/refresh`,
+- `httpserver/` — `jwtmintd` daemon: `/sign`, `/verify`, `/refresh`,
   `/.well-known/jwks.json`, `/.well-known/openid-configuration` (opt-in),
   `/k8s/token-review` (opt-in), `/metrics`, `/healthz`. Bearer-auth or pluggable
   `Authenticator` for mutating endpoints.
@@ -49,10 +49,10 @@ import (
 
     "github.com/golang-jwt/jwt/v5"
 
-    "github.com/dcadolph/jwtsmith/claims"
-    "github.com/dcadolph/jwtsmith/keys"
-    "github.com/dcadolph/jwtsmith/signing"
-    "github.com/dcadolph/jwtsmith/verification"
+    "github.com/dcadolph/jwtmint/claims"
+    "github.com/dcadolph/jwtmint/keys"
+    "github.com/dcadolph/jwtmint/signing"
+    "github.com/dcadolph/jwtmint/verification"
 )
 
 priv, pub, _ := keys.GenerateECDSA(elliptic.P256())
@@ -143,13 +143,13 @@ is orders of magnitude faster than a round trip per request.
 `/k8s/token-review`); the JWKS Remote caps fetched bodies at 1 MiB. Increase via the
 relevant config when you have a real reason.
 
-## Daemon (`jwtsmithd`)
+## Daemon (`jwtmintd`)
 
 ```
-go install github.com/dcadolph/jwtsmith/cmd/jwtsmithd@latest
+go install github.com/dcadolph/jwtmint/cmd/jwtmintd@latest
 ```
 
-See `cmd/jwtsmithd/` for flags. Minimum required: `--method`, `--private-key`,
+See `cmd/jwtmintd/` for flags. Minimum required: `--method`, `--private-key`,
 `--public-key`. Enable `/k8s/token-review` with `--enable-token-review`; OIDC discovery
 with `--issuer https://your-host:port`; Prometheus metrics are always on at `/metrics`.
 
@@ -157,10 +157,10 @@ with `--issuer https://your-host:port`; Prometheus metrics are always on at `/me
 trust boundary, the same posture most controllers and operators take. If you expose the
 daemon to the public internet, gate those paths at the ingress.
 
-## Controller (`jwtsmith-controller`)
+## Controller (`jwtmint-controller`)
 
 ```
-go install github.com/dcadolph/jwtsmith/cmd/jwtsmith-controller@latest
+go install github.com/dcadolph/jwtmint/cmd/jwtmint-controller@latest
 ```
 
 Watches `JWTRequest` resources and maintains a `Secret` holding a fresh token, refreshing

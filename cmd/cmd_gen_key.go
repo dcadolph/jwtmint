@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/dcadolph/jwtsmith/keys"
+	"github.com/dcadolph/jwtmint/keys"
 )
 
 // Supported algorithm names for the gen-key command.

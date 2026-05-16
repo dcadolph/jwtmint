@@ -14,10 +14,10 @@ import (
 	authnv1 "k8s.io/api/authentication/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/signing"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/signing"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // TestHandlerAuthenticated covers a token that should be accepted.

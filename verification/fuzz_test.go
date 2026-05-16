@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/keys"
+	"github.com/dcadolph/jwtmint/keys"
 )
 
 // FuzzVerifyParse exercises the verifier's Verify entrypoint against arbitrary input strings.

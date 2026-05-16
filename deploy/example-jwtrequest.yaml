@@ -2,7 +2,7 @@
 # Secret named "billing-token" in the same namespace. A workload pod can mount the
 # Secret and use the data["token"] value as a bearer token for outgoing requests.
 
-apiVersion: jwtsmith.io/v1alpha1
+apiVersion: jwtmint.io/v1alpha1
 kind: JWTRequest
 metadata:
   name: billing-token
@@ -10,7 +10,7 @@ metadata:
 spec:
   secretName: billing-token
   subject: billing-service
-  issuer: jwtsmith-controller
+  issuer: jwtmint-controller
   audience:
     - api.internal
   groups:

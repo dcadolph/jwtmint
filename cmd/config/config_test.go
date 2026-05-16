@@ -12,11 +12,11 @@ func TestEnvKey(t *testing.T) {
 		Flag string
 		Want string
 	}{
-		{Flag: "default-issuer", Want: "JWTSMITH_DEFAULT_ISSUER"},
-		{Flag: "priv", Want: "JWTSMITH_PRIV"},
-		{Flag: "pub", Want: "JWTSMITH_PUB"},
-		{Flag: "jwks-url", Want: "JWTSMITH_JWKS_URL"},
-		{Flag: "expires", Want: "JWTSMITH_EXPIRES"},
+		{Flag: "default-issuer", Want: "JWTMINT_DEFAULT_ISSUER"},
+		{Flag: "priv", Want: "JWTMINT_PRIV"},
+		{Flag: "pub", Want: "JWTMINT_PUB"},
+		{Flag: "jwks-url", Want: "JWTMINT_JWKS_URL"},
+		{Flag: "expires", Want: "JWTMINT_EXPIRES"},
 	}
 
 	for testNum, test := range tests {

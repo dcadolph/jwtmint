@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // MinRSABits is the minimum acceptable RSA key size for new keys.
@@ -70,7 +70,7 @@ func ValidateRSAPair(publicKey *rsa.PublicKey, privateKey *rsa.PrivateKey) error
 		return fmt.Errorf("%w: private key cannot be nil", pkgerr.ErrInvalidValue)
 	}
 
-	hash := sha256.Sum256([]byte("jwtsmith RSA pair validation"))
+	hash := sha256.Sum256([]byte("jwtmint RSA pair validation"))
 	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hash[:])
 	if err != nil {
 		return fmt.Errorf("%w: signing validation message: %w", pkgerr.ErrSign, err)

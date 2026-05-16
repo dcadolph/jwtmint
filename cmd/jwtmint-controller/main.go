@@ -1,11 +1,11 @@
-// jwtsmith-controller is the Kubernetes controller that reconciles JWTRequest resources
+// jwtmint-controller is the Kubernetes controller that reconciles JWTRequest resources
 // into Secrets holding freshly minted JWTs.
 //
 // The controller signs tokens with a single keypair loaded at startup (same model as
-// jwtsmithd) and re-mints them as their lifetime ticks down past a configurable
+// jwtmintd) and re-mints them as their lifetime ticks down past a configurable
 // refresh threshold. A workload pod mounts the Secret at a known path and uses the
-// JWT to authenticate to other services. Verifiers either import jwtsmith's middleware
-// (httpauth/grpcauth) or point the kube-apiserver at jwtsmithd's TokenReview webhook.
+// JWT to authenticate to other services. Verifiers either import jwtmint's middleware
+// (httpauth/grpcauth) or point the kube-apiserver at jwtmintd's TokenReview webhook.
 package main
 
 import (
@@ -30,11 +30,11 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	"github.com/dcadolph/jwtsmith/k8s/admission"
-	v1alpha1 "github.com/dcadolph/jwtsmith/k8s/api/v1alpha1"
-	"github.com/dcadolph/jwtsmith/k8s/controller"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/k8s/admission"
+	v1alpha1 "github.com/dcadolph/jwtmint/k8s/api/v1alpha1"
+	"github.com/dcadolph/jwtmint/k8s/controller"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // stringSlice is a flag.Value for repeatable string flags.
@@ -66,7 +66,7 @@ func init() {
 // main parses flags, builds the manager, registers the reconciler, and runs it.
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "jwtsmith-controller: %s\n", err)
+		fmt.Fprintf(os.Stderr, "jwtmint-controller: %s\n", err)
 		os.Exit(1)
 	}
 }
@@ -99,7 +99,7 @@ func run() error {
 	fs.StringVar(&privPath, "priv", "", "Path to PEM private key. Required.")
 	fs.StringVar(&pubPath, "pub", "", "Path to PEM public key. Required.")
 	fs.StringVar(&kid, "kid", "", "Key ID embedded as token header.")
-	fs.StringVar(&issuer, "default-issuer", "jwtsmith-controller", "Default iss claim.")
+	fs.StringVar(&issuer, "default-issuer", "jwtmint-controller", "Default iss claim.")
 	fs.DurationVar(&defaultExpiration, "default-expires", time.Hour, "Default token lifetime when JWTRequest.spec.expiresIn is empty.")
 	fs.StringVar(&metricsAddr, "metrics-addr", ":8080", "Address for the metrics endpoint.")
 	fs.StringVar(&probeAddr, "health-addr", ":8081", "Address for the health/readiness endpoint.")
@@ -158,7 +158,7 @@ func run() error {
 		Metrics:                metricsserver.Options{BindAddress: metricsAddr},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         leaderElection,
-		LeaderElectionID:       "jwtsmith-controller-leader",
+		LeaderElectionID:       "jwtmint-controller-leader",
 		Controller:             ctrlconfig.Controller{},
 	}
 	if enableWebhook {
@@ -202,7 +202,7 @@ func run() error {
 		return fmt.Errorf("readyz check: %w", err)
 	}
 
-	zapLog.Info("jwtsmith-controller starting",
+	zapLog.Info("jwtmint-controller starting",
 		zap.String("alg", signMethod.Alg()),
 		zap.String("kid", kid),
 		zap.String("issuer", issuer),

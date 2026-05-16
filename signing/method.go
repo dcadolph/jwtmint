@@ -8,13 +8,13 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // SigningMethod returns the jwt.SigningMethod for the given JWS "alg" string.
 //
-// HMAC methods (HS256/HS384/HS512) are explicitly rejected — jwtsmith supports asymmetric
+// HMAC methods (HS256/HS384/HS512) are explicitly rejected — jwtmint supports asymmetric
 // methods only.
 func SigningMethod(alg string) (jwt.SigningMethod, error) { //nolint:ireturn // Interface return is required.
 	switch alg {
@@ -44,7 +44,7 @@ func SigningMethod(alg string) (jwt.SigningMethod, error) { //nolint:ireturn // 
 		jwt.SigningMethodHS384.Alg(),
 		jwt.SigningMethodHS512.Alg():
 		return nil, fmt.Errorf(
-			"%w: %s: HMAC methods not supported: jwtsmith uses asymmetric methods only",
+			"%w: %s: HMAC methods not supported: jwtmint uses asymmetric methods only",
 			pkgerr.ErrInvalidMethod, alg,
 		)
 	default:
@@ -103,7 +103,7 @@ func validateMethodAndKey(method jwt.SigningMethod, signingKey any) error {
 
 	default:
 		return fmt.Errorf(
-			"%w: unsupported method type %T: jwtsmith supports ECDSA, RSA, RSAPSS, Ed25519",
+			"%w: unsupported method type %T: jwtmint supports ECDSA, RSA, RSAPSS, Ed25519",
 			pkgerr.ErrInvalidMethod, method,
 		)
 	}

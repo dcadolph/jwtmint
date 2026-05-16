@@ -8,11 +8,11 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/pkgerr"
-	"github.com/dcadolph/jwtsmith/revocation"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/pkgerr"
+	"github.com/dcadolph/jwtmint/revocation"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // TestVerifyWithRevoker exercises a revoked vs non-revoked jti through the verifier.

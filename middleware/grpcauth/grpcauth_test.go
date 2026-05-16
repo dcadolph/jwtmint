@@ -18,10 +18,10 @@ import (
 	healthsvc "google.golang.org/grpc/health"
 	"google.golang.org/grpc/status"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/signing"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/signing"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // TestUnaryInterceptor exercises the interceptor against a real gRPC health server.

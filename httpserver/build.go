@@ -3,9 +3,9 @@ package httpserver
 import (
 	"fmt"
 
-	"github.com/dcadolph/jwtsmith/jwks"
-	"github.com/dcadolph/jwtsmith/pkgerr"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/jwks"
+	"github.com/dcadolph/jwtmint/pkgerr"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // buildVerifier returns a single-key verifier when no AdditionalKeys are configured,

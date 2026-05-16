@@ -1,4 +1,4 @@
-# RBAC for jwtsmith-controller running as a ServiceAccount in cluster.
+# RBAC for jwtmint-controller running as a ServiceAccount in cluster.
 #
 # Grants the minimum needed: full control over JWTRequest + status, plus the ability
 # to create and update Secrets in the namespaces it watches. Adjust namespace scoping
@@ -7,18 +7,18 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: jwtsmith-controller
-  namespace: jwtsmith-system
+  name: jwtmint-controller
+  namespace: jwtmint-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: jwtsmith-controller
+  name: jwtmint-controller
 rules:
-  - apiGroups: [jwtsmith.io]
+  - apiGroups: [jwtmint.io]
     resources: [jwtrequests]
     verbs: [get, list, watch, update, patch]
-  - apiGroups: [jwtsmith.io]
+  - apiGroups: [jwtmint.io]
     resources: [jwtrequests/status]
     verbs: [get, update, patch]
   - apiGroups: [""]
@@ -35,12 +35,12 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: jwtsmith-controller
+  name: jwtmint-controller
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: jwtsmith-controller
+  name: jwtmint-controller
 subjects:
   - kind: ServiceAccount
-    name: jwtsmith-controller
-    namespace: jwtsmith-system
+    name: jwtmint-controller
+    namespace: jwtmint-system

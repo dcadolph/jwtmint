@@ -17,10 +17,10 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	v1alpha1 "github.com/dcadolph/jwtsmith/k8s/api/v1alpha1"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/claims"
+	v1alpha1 "github.com/dcadolph/jwtmint/k8s/api/v1alpha1"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // newReconciler builds a reconciler with a fake client and a real ECDSA signer.

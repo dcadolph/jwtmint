@@ -17,8 +17,8 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
 
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // testServer builds a Server suitable for httptest, returning the configured cfg too

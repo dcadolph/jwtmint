@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/dcadolph/jwtsmith/middleware/httpauth"
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/middleware/httpauth"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // UnaryClientInterceptor returns a gRPC unary client interceptor that attaches

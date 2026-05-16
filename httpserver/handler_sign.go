@@ -9,9 +9,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"go.uber.org/zap"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // MaxSignBodyBytes caps the /sign request body. Tokens with megabytes of claims are

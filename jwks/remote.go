@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // DefaultRemoteTTL is the cache lifetime applied when none is provided.

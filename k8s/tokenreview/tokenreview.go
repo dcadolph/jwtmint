@@ -1,5 +1,5 @@
 // Package tokenreview implements a Kubernetes TokenReview webhook handler that
-// validates JWTs using a jwtsmith verification.Verifier.
+// validates JWTs using a jwtmint verification.Verifier.
 //
 // Wire the Handler into any net/http mux at the path the apiserver's --authentication-token-webhook-config
 // kubeconfig points at. The handler decodes the inbound TokenReview request, verifies
@@ -23,10 +23,10 @@ import (
 	authnv1 "k8s.io/api/authentication/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
-	"github.com/dcadolph/jwtsmith/pkgerr"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/pkgerr"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // UserInfoMapper translates verified JWT claims into a Kubernetes UserInfo.

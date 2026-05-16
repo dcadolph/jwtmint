@@ -8,7 +8,7 @@ import (
 func newRootCmd() *cobra.Command {
 
 	root := &cobra.Command{
-		Use:           "jwtsmith",
+		Use:           "jwtmint",
 		Short:         "JWT toolkit: generate keys, sign, decode, verify, refresh, distribute via JWKS.",
 		SilenceUsage:  true,
 		SilenceErrors: true,

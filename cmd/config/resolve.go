@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // String returns flagValue when non-empty, otherwise the env value, otherwise def.

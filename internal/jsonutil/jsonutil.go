@@ -1,7 +1,7 @@
-// Package jsonutil centralizes JSON encoding for the jwtsmith CLI and HTTP server.
+// Package jsonutil centralizes JSON encoding for the jwtmint CLI and HTTP server.
 //
 // Compact by default; pass pretty=true to indent. HTML escaping is disabled because
-// jwtsmith's outputs (tokens, claims) commonly contain characters that should not be
+// jwtmint's outputs (tokens, claims) commonly contain characters that should not be
 // HTML-escaped when displayed or piped to other tools.
 package jsonutil
 
@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // Marshal encodes v as JSON. When pretty is true, output is indented two spaces.

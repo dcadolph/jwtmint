@@ -18,7 +18,7 @@ const (
 	KeySubject = "sub"
 )
 
-// Common non-registered claim keys used by jwtsmith helpers.
+// Common non-registered claim keys used by jwtmint helpers.
 const (
 	// KeyGroups is the "groups" claim key.
 	KeyGroups = "groups"

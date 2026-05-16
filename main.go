@@ -1,8 +1,8 @@
-// jwtsmith is a CLI for generating, signing, decoding, verifying, and refreshing JWTs.
+// jwtmint is a CLI for generating, signing, decoding, verifying, and refreshing JWTs.
 package main
 
 import (
-	"github.com/dcadolph/jwtsmith/cmd"
+	"github.com/dcadolph/jwtmint/cmd"
 )
 
 // main hands off to cmd.Execute, which sets the process exit code.

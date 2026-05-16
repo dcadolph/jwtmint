@@ -9,7 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// metrics holds the Prometheus collectors registered for jwtsmithd request observability.
+// metrics holds the Prometheus collectors registered for jwtmintd request observability.
 type metrics struct {
 	requests *prometheus.CounterVec
 	duration *prometheus.HistogramVec
@@ -22,13 +22,13 @@ func newMetrics(reg prometheus.Registerer) *metrics {
 
 	m := &metrics{
 		requests: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Namespace: "jwtsmith",
+			Namespace: "jwtmint",
 			Subsystem: "http",
 			Name:      "requests_total",
-			Help:      "Total HTTP requests processed by jwtsmithd, partitioned by path, method, and status.",
+			Help:      "Total HTTP requests processed by jwtmintd, partitioned by path, method, and status.",
 		}, []string{"path", "method", "status"}),
 		duration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: "jwtsmith",
+			Namespace: "jwtmint",
 			Subsystem: "http",
 			Name:      "request_duration_seconds",
 			Help:      "HTTP request handler duration in seconds, partitioned by path and method.",

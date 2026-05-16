@@ -10,8 +10,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/dcadolph/jwtsmith/refresh"
-	"github.com/dcadolph/jwtsmith/signing"
+	"github.com/dcadolph/jwtmint/refresh"
+	"github.com/dcadolph/jwtmint/signing"
 )
 
 // newRefreshCmd builds the "refresh" subcommand for rotating tokens.

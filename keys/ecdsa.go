@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // GenerateECDSA generates a new ECDSA key pair on the given curve.
@@ -70,7 +70,7 @@ func ValidateECDSAPair(publicKey *ecdsa.PublicKey, privateKey *ecdsa.PrivateKey)
 		return fmt.Errorf("%w: private key cannot be nil", pkgerr.ErrInvalidValue)
 	}
 
-	hash := sha256.Sum256([]byte("jwtsmith ECDSA pair validation"))
+	hash := sha256.Sum256([]byte("jwtmint ECDSA pair validation"))
 	r, s, err := ecdsa.Sign(rand.Reader, privateKey, hash[:])
 	if err != nil {
 		return fmt.Errorf("%w: signing validation message: %w", pkgerr.ErrSign, err)

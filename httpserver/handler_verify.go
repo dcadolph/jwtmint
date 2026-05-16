@@ -6,9 +6,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // MaxVerifyBodyBytes caps the /verify request body.

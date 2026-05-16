@@ -37,7 +37,7 @@ func exitCodeFor(err error) int {
 		return quiet.Code
 	}
 
-	fmt.Fprintf(os.Stderr, "jwtsmith: %s\n", err)
+	fmt.Fprintf(os.Stderr, "jwtmint: %s\n", err)
 
 	switch {
 	case errors.Is(err, ErrUsage):

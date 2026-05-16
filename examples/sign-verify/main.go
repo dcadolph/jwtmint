@@ -1,5 +1,5 @@
 // Command sign-verify demonstrates an end-to-end mint -> verify -> refresh -> revoke flow
-// using only the jwtsmith library (no daemon).
+// using only the jwtmint library (no daemon).
 //
 // Run: go run ./examples/sign-verify
 package main
@@ -14,13 +14,13 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/pkgerr"
-	"github.com/dcadolph/jwtsmith/refresh"
-	"github.com/dcadolph/jwtsmith/revocation"
-	"github.com/dcadolph/jwtsmith/signing"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/pkgerr"
+	"github.com/dcadolph/jwtmint/refresh"
+	"github.com/dcadolph/jwtmint/revocation"
+	"github.com/dcadolph/jwtmint/signing"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 func main() {

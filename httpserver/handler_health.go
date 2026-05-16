@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
 )
 
 // handleHealth returns a liveness handler that always reports OK with the current server time.

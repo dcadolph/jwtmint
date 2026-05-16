@@ -19,8 +19,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // ErrReservedHeader is returned when a caller tries to set a reserved JWT header (currently "alg").
@@ -31,7 +31,7 @@ const (
 	// DefaultExpiration is added to time.Now when "exp" is not set in the input claims.
 	DefaultExpiration = time.Hour
 	// DefaultIssuer is set as "iss" when not set in the input claims.
-	DefaultIssuer = "jwtsmith"
+	DefaultIssuer = "jwtmint"
 	// DefaultTyp is the "typ" header set when callers do not override it.
 	DefaultTyp = "JWT"
 )
@@ -125,7 +125,7 @@ func (s *signer) mergedClaims(c jwt.MapClaims) jwt.MapClaims {
 }
 
 // Signed returns a signed token string built from the given method, signing key,
-// headers, and claims, applying jwtsmith's package-level defaults for missing
+// headers, and claims, applying jwtmint's package-level defaults for missing
 // exp/iat/nbf/jti/iss/typ.
 //
 // "alg" in the headers map is rejected. "typ" is honored if present; defaults to "JWT".

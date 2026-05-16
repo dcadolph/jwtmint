@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dcadolph/jwtsmith/keys"
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/keys"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // TestJWKRoundtripPerAlgorithm encodes then decodes a public key for each supported kty.

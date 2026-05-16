@@ -3,7 +3,7 @@ package httpserver
 import (
 	"net/http"
 
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
 )
 
 // writeError writes an ErrorResponse with the given status, error code, and detail.

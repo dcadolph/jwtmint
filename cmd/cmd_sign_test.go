@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
-	"github.com/dcadolph/jwtsmith/claims"
+	"github.com/dcadolph/jwtmint/claims"
 )
 
 // TestBuildClaims covers the merging of profile, JSON, and key=value claim sources.

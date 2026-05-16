@@ -3,8 +3,8 @@ package httpserver
 import (
 	"net/http"
 
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
-	"github.com/dcadolph/jwtsmith/jwks"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/jwks"
 )
 
 // handleJWKS returns a handler that publishes the server's public key as an RFC 7517 JWKS.

@@ -2,7 +2,7 @@
 // Kubernetes ServiceAccount token by submitting a TokenReview to the apiserver.
 //
 // This is the k8s-native alternative to a static bearer token: pods authenticate to
-// jwtsmithd using their projected SA token, and jwtsmithd verifies it against the
+// jwtmintd using their projected SA token, and jwtmintd verifies it against the
 // apiserver before allowing /sign or /refresh.
 package k8sauth
 
@@ -16,8 +16,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"github.com/dcadolph/jwtsmith/httpserver"
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/httpserver"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // SAAuthenticator validates a request's bearer token by submitting it to the apiserver
@@ -50,7 +50,7 @@ func WithAllowedSAs(usernames ...string) Opt {
 }
 
 // WithAudiences asks the apiserver to validate the token only when its audience binding
-// includes at least one of the given audiences. Use to scope SA tokens to jwtsmithd.
+// includes at least one of the given audiences. Use to scope SA tokens to jwtmintd.
 func WithAudiences(audiences ...string) Opt {
 	return func(a *SAAuthenticator) {
 		a.audiences = append(a.audiences, audiences...)

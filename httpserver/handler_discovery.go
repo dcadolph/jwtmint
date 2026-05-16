@@ -4,12 +4,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
 )
 
-// discoveryDoc is the subset of OIDC discovery fields jwtsmithd publishes.
+// discoveryDoc is the subset of OIDC discovery fields jwtmintd publishes.
 //
-// jwtsmithd is not a full OIDC provider; this document exists so OIDC libraries that
+// jwtmintd is not a full OIDC provider; this document exists so OIDC libraries that
 // expect /.well-known/openid-configuration can auto-discover the JWKS URI and signing
 // algorithms. Token endpoint, userinfo endpoint, and other OIDC features are not provided.
 type discoveryDoc struct {
@@ -23,7 +23,7 @@ type discoveryDoc struct {
 // handleOIDCDiscovery returns a handler that publishes the OIDC discovery document.
 //
 // issuer must match what tokens carry as the "iss" claim — typically the publicly-reachable
-// scheme://host[:port] of jwtsmithd. algs lists every signing alg the JWKS includes.
+// scheme://host[:port] of jwtmintd. algs lists every signing alg the JWKS includes.
 func handleOIDCDiscovery(issuer string, algs []string) http.HandlerFunc {
 
 	doc := discoveryDoc{

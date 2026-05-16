@@ -6,9 +6,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/internal/jsonutil"
-	"github.com/dcadolph/jwtsmith/refresh"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/internal/jsonutil"
+	"github.com/dcadolph/jwtmint/refresh"
 )
 
 // MaxRefreshBodyBytes caps the /refresh request body.

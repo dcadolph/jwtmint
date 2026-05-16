@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dcadolph/jwtsmith/pkgerr"
+	"github.com/dcadolph/jwtmint/pkgerr"
 )
 
 // PEM block types written by this package.

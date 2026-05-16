@@ -41,18 +41,18 @@ shorter doesn't show enough.
 
 **Length:** 60 seconds.
 
-### 2. Daemon (jwtsmithd)
+### 2. Daemon (jwtmintd)
 
 **Goal:** "Same primitives, exposed as HTTP for any language."
 
 **Script:**
-1. Cold start: `jwtsmithd --method ES256 --private-key priv.pem --public-key pub.pem &`.
-   Show the startup log (jwtsmithd listening on :8080).
+1. Cold start: `jwtmintd --method ES256 --private-key priv.pem --public-key pub.pem &`.
+   Show the startup log (jwtmintd listening on :8080).
 2. `curl /healthz` → 200.
 3. `curl /.well-known/jwks.json | jq` → show the published key.
 4. `curl -X POST /sign -d '{"claims": {"sub": "u1"}}'` → token returned.
 5. `curl -X POST /verify -d '{"token": "<paste>"}'` → `{"valid": true}`.
-6. `curl /metrics | grep jwtsmith_http` → show the Prometheus counters incrementing.
+6. `curl /metrics | grep jwtmint_http` → show the Prometheus counters incrementing.
 7. Hold final frame: "Sign, verify, refresh, JWKS, OIDC discovery, metrics."
 
 **Length:** 90 seconds.

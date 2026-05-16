@@ -14,9 +14,9 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/dcadolph/jwtsmith/claims"
-	"github.com/dcadolph/jwtsmith/pkgerr"
-	"github.com/dcadolph/jwtsmith/verification"
+	"github.com/dcadolph/jwtmint/claims"
+	"github.com/dcadolph/jwtmint/pkgerr"
+	"github.com/dcadolph/jwtmint/verification"
 )
 
 // HeaderAuthorization is the header inspected for the bearer token.
@@ -157,7 +157,7 @@ func defaultErrorHandler(w http.ResponseWriter, _ *http.Request, err error) {
 		status = http.StatusForbidden
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("WWW-Authenticate", `Bearer realm="jwtsmith"`)
+	w.Header().Set("WWW-Authenticate", `Bearer realm="jwtmint"`)
 	w.WriteHeader(status)
 	fmt.Fprintf(w, `{"error":"unauthorized","detail":%q}`, err.Error())
 }

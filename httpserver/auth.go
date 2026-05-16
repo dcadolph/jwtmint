@@ -34,7 +34,7 @@ func requireAuth(a Authenticator, next http.HandlerFunc) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := a.Authenticate(r); err != nil {
-			w.Header().Set("WWW-Authenticate", `Bearer realm="jwtsmithd"`)
+			w.Header().Set("WWW-Authenticate", `Bearer realm="jwtmintd"`)
 			writeError(w, http.StatusUnauthorized, "unauthorized", err.Error())
 			return
 		}
