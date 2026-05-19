@@ -81,46 +81,14 @@ a `TokenSource` with static, file, and cached variants.
 
 ## Design choices
 
-### Asymmetric only
-
-HMAC methods (`HS256` and so on) are rejected at signer construction. JWTs cross
-trust boundaries, and HMAC requires shared secrets, which is the wrong shape for
-a library that publishes verification keys via JWKS. Use ES256 (default in
-examples), ES384, ES512, RS256/384/512, PS256/384/512, or EdDSA.
-
-### Context everywhere
-
-`Sign`, `Verify`, `Refresh`, `TokenCheckFunc`, and `claims.CheckFunc` all take
-`context.Context`. Lookups for revocation, claims resolution, and similar checks
-honor request deadlines.
-
-### Default leeway
-
-`verification.NewVerifier` applies a 30 second clock-skew leeway to `exp` and
-`nbf` by default. Override with `verification.WithLeeway(0)` to disable, or
-`verification.WithLeeway(d)` to widen.
-
-### Default-deny admission
-
-The admission webhook's `SelfOnlyPolicy` denies every requested audience, group,
-entitlement, role, and extra-claim key by default. Use `"*"` in the allow list to
-opt out, per list, not global.
-
-### Reserved headers
-
-`alg` is set by the signing library and cannot be overridden via
-`WithStaticHeaders` or per-call headers. Overriding it would lie about the
-signature algorithm. `typ` can be overridden, for example `at+jwt` for RFC 9068
-access tokens, via `signing.WithDefaultTyp` or the per-call `headers` argument to
-`Sign`.
-
-### Refresh constraints
-
-`refresh.NewRefresher` defaults to a 24h `MaxAge`. A token older than that by
-`iat` cannot be refreshed. Pass `refresh.WithMaxAge(0)` to disable, or
-`refresh.WithMaxAge(d)` to set explicitly. `refresh.WithClaimsResolver` lets
-callers rewrite or reject claims at refresh time, for example dropping revoked
-groups or failing refresh for deprovisioned users.
+| Choice&nbsp;&nbsp;&nbsp;&nbsp; | Details |
+|--------------------------------|---------|
+| Asymmetric only                | HMAC methods (`HS256` and so on) are rejected at signer construction. JWTs cross trust boundaries, and HMAC requires shared secrets, which is the wrong shape for a library that publishes verification keys via JWKS. Use ES256 (default in examples), ES384, ES512, RS256/384/512, PS256/384/512, or EdDSA. |
+| Context everywhere             | `Sign`, `Verify`, `Refresh`, `TokenCheckFunc`, and `claims.CheckFunc` all take `context.Context`. Lookups for revocation, claims resolution, and similar checks honor request deadlines. |
+| Default leeway                 | `verification.NewVerifier` applies a 30 second clock-skew leeway to `exp` and `nbf` by default. Override with `verification.WithLeeway(0)` to disable, or `verification.WithLeeway(d)` to widen. |
+| Default-deny admission         | The admission webhook's `SelfOnlyPolicy` denies every requested audience, group, entitlement, role, and extra-claim key by default. Use `"*"` in the allow list to opt out, per list, not global. |
+| Reserved headers               | `alg` is set by the signing library and cannot be overridden via `WithStaticHeaders` or per-call headers. Overriding it would lie about the signature algorithm. `typ` can be overridden, for example `at+jwt` for RFC 9068 access tokens, via `signing.WithDefaultTyp` or the per-call `headers` argument to `Sign`. |
+| Refresh constraints            | `refresh.NewRefresher` defaults to a 24h `MaxAge`. A token older than that by `iat` cannot be refreshed. Pass `refresh.WithMaxAge(0)` to disable, or `refresh.WithMaxAge(d)` to set explicitly. `refresh.WithClaimsResolver` lets callers rewrite or reject claims at refresh time, for example dropping revoked groups or failing refresh for deprovisioned users. |
 
 ## Out of scope
 
@@ -132,35 +100,12 @@ groups or failing refresh for deprovisioned users.
 
 ## Operational notes
 
-### Key rotation
-
-Roll forward by adding the new keypair as `Config.Method`, `PrivateKey`, and
-`PublicKey`. Demote the previous keypair into `Config.AdditionalKeys`. Both kids
-remain in the JWKS until the previous key's tokens have expired. Restart without
-the demoted entry to finish the cutover. The verifier dispatches by `kid` header.
-
-### Revocation
-
-For single-replica deployments, plug `revocation.NewMemRevoker()` into
-`httpserver.Config.Revoker`. For multi-replica fleets, implement
-`revocation.Revoker` against a shared store such as Redis, etcd, or a database,
-and front it with a `MemRevoker` via `revocation.Chain(memCache, sharedStore)`.
-Backend errors fail verification. This is intentional. The alternative is
-fail-open. `MemRevoker` does not auto-evict expired entries. Call `Cleanup()` on
-a ticker if revocation traffic is heavy enough to grow the map noticeably.
-
-### /verify is a query, not auth
-
-It returns `200` with `{valid: false}` for bad tokens, not `401`. It exists for
-ad-hoc debugging and for callers without a JWT library in their stack. Do not put
-`/verify` in a hot path. Verifying locally with the JWKS is orders of magnitude
-faster than a round trip per request.
-
-### Body limits
-
-The daemon caps request bodies at 64 KiB on `/sign`, `/verify`, `/refresh`, and
-`/k8s/token-review`. The JWKS `Remote` caps fetched bodies at 1 MiB. Raise these
-via the relevant config when needed.
+| Topic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Details |
+|-------------------------------------|---------|
+| Key rotation                        | Roll forward by adding the new keypair as `Config.Method`, `PrivateKey`, and `PublicKey`. Demote the previous keypair into `Config.AdditionalKeys`. Both kids remain in the JWKS until the previous key's tokens have expired. Restart without the demoted entry to finish the cutover. The verifier dispatches by `kid` header. |
+| Revocation                          | For single-replica deployments, plug `revocation.NewMemRevoker()` into `httpserver.Config.Revoker`. For multi-replica fleets, implement `revocation.Revoker` against a shared store such as Redis, etcd, or a database, and front it with a `MemRevoker` via `revocation.Chain(memCache, sharedStore)`. Backend errors fail verification. This is intentional. The alternative is fail-open. `MemRevoker` does not auto-evict expired entries. Call `Cleanup()` on a ticker if revocation traffic is heavy enough to grow the map noticeably. |
+| `/verify` is a query, not auth      | Returns `200` with `{valid: false}` for bad tokens, not `401`. It exists for ad-hoc debugging and for callers without a JWT library in their stack. Do not put `/verify` in a hot path. Verifying locally with the JWKS is orders of magnitude faster than a round trip per request. |
+| Body limits                         | The daemon caps request bodies at 64 KiB on `/sign`, `/verify`, `/refresh`, and `/k8s/token-review`. The JWKS `Remote` caps fetched bodies at 1 MiB. Raise via the relevant config when needed. |
 
 ## Daemon (jwtmintd)
 
