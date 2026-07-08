@@ -87,12 +87,12 @@ a `TokenSource` with static, file, and cached variants.
 
 | Choice&nbsp;&nbsp;&nbsp;&nbsp; | Details |
 |--------------------------------|---------|
-| Asymmetric only                | HMAC methods (`HS256` and so on) are rejected at signer construction. JWTs cross trust boundaries, and HMAC requires shared secrets, which is the wrong shape for a library that publishes verification keys via JWKS. Use ES256 (default in examples), ES384, ES512, RS256/384/512, PS256/384/512, or EdDSA. |
-| Context everywhere             | `Sign`, `Verify`, `Refresh`, `TokenCheckFunc`, and `claims.CheckFunc` all take `context.Context`. Lookups for revocation, claims resolution, and similar checks honor request deadlines. |
-| Default leeway                 | `verification.NewVerifier` applies a 30 second clock-skew leeway to `exp` and `nbf` by default. Override with `verification.WithLeeway(0)` to disable, or `verification.WithLeeway(d)` to widen. |
-| Default-deny admission         | The admission webhook's `SelfOnlyPolicy` denies every requested audience, group, entitlement, role, and extra-claim key by default. Use `"*"` in the allow list to opt out, per list, not global. |
-| Reserved headers               | `alg` is set by the signing library and cannot be overridden via `WithStaticHeaders` or per-call headers. Overriding it would lie about the signature algorithm. `typ` can be overridden, for example `at+jwt` for RFC 9068 access tokens, via `signing.WithDefaultTyp` or the per-call `headers` argument to `Sign`. |
-| Refresh constraints            | `refresh.NewRefresher` defaults to a 24h `MaxAge`. A token older than that by `iat` cannot be refreshed. Pass `refresh.WithMaxAge(0)` to disable, or `refresh.WithMaxAge(d)` to set explicitly. `refresh.WithClaimsResolver` lets callers rewrite or reject claims at refresh time, for example dropping revoked groups or failing refresh for deprovisioned users. |
+| Asymmetric&nbsp;only           | HMAC methods (`HS256` and so on) are rejected at signer construction. JWTs cross trust boundaries, and HMAC requires shared secrets, which is the wrong shape for a library that publishes verification keys via JWKS. Use ES256 (default in examples), ES384, ES512, RS256/384/512, PS256/384/512, or EdDSA. |
+| Context&nbsp;everywhere        | `Sign`, `Verify`, `Refresh`, `TokenCheckFunc`, and `claims.CheckFunc` all take `context.Context`. Lookups for revocation, claims resolution, and similar checks honor request deadlines. |
+| Default&nbsp;leeway            | `verification.NewVerifier` applies a 30 second clock-skew leeway to `exp` and `nbf` by default. Override with `verification.WithLeeway(0)` to disable, or `verification.WithLeeway(d)` to widen. |
+| Default-deny&nbsp;admission    | The admission webhook's `SelfOnlyPolicy` denies every requested audience, group, entitlement, role, and extra-claim key by default. Use `"*"` in the allow list to opt out, per list, not global. |
+| Reserved&nbsp;headers          | `alg` is set by the signing library and cannot be overridden via `WithStaticHeaders` or per-call headers. Overriding it would lie about the signature algorithm. `typ` can be overridden, for example `at+jwt` for RFC 9068 access tokens, via `signing.WithDefaultTyp` or the per-call `headers` argument to `Sign`. |
+| Refresh&nbsp;constraints       | `refresh.NewRefresher` defaults to a 24h `MaxAge`. A token older than that by `iat` cannot be refreshed. Pass `refresh.WithMaxAge(0)` to disable, or `refresh.WithMaxAge(d)` to set explicitly. `refresh.WithClaimsResolver` lets callers rewrite or reject claims at refresh time, for example dropping revoked groups or failing refresh for deprovisioned users. |
 
 ## Out of scope
 
