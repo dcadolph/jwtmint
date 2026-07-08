@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="jwtmint.png" alt="jwtmint" width="240">
+  <img src="jwtmint.png" alt="jwtmint" width="100%">
 </p>
 
 # jwtmint
