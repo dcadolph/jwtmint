@@ -93,6 +93,6 @@ func runRefresh(ctx context.Context, methodName, pubPath, privPath, token string
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(cobraStdout(), refreshed)
+	_, _ = fmt.Fprintln(cobraStdout(), refreshed)
 	return nil
 }

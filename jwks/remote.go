@@ -221,7 +221,7 @@ func (r *Remote) doFetch(ctx context.Context) (*KeySet, time.Duration, error) {
 	if err != nil {
 		return nil, 0, fmt.Errorf("%w: fetching jwks: %w", pkgerr.ErrRead, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, 0, fmt.Errorf("%w: jwks fetch returned status %d", pkgerr.ErrRead, resp.StatusCode)

@@ -268,8 +268,8 @@ func TestPublicKeyFunc(t *testing.T) {
 	}
 
 	// Type assertions on returned key.
-	var _ *ecdsa.PrivateKey = priv
-	var _ *ecdsa.PublicKey = pub
+	var _ *ecdsa.PrivateKey = priv //nolint:staticcheck // Documents the concrete returned type.
+	var _ *ecdsa.PublicKey = pub   //nolint:staticcheck // Documents the concrete returned type.
 	var _ *rsa.PublicKey
 	var _ ed25519.PublicKey
 }

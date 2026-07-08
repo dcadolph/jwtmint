@@ -108,7 +108,7 @@ func runVerify(ctx context.Context, f *verifyFlags) error {
 		return err
 	}
 
-	fmt.Fprintln(cobraStderr(), "ok")
+	_, _ = fmt.Fprintln(cobraStderr(), "ok")
 
 	if f.printClaims {
 		mc, err := claims.ToMapClaims(tok.Claims)

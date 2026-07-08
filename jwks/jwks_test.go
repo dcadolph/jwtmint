@@ -65,7 +65,7 @@ func samePublicKey(a, b any) bool {
 		return ok && x.N.Cmp(y.N) == 0 && x.E == y.E
 	case *ecdsa.PublicKey:
 		y, ok := b.(*ecdsa.PublicKey)
-		return ok && x.X.Cmp(y.X) == 0 && x.Y.Cmp(y.Y) == 0 && x.Curve == y.Curve
+		return ok && x.Equal(y)
 	case ed25519.PublicKey:
 		y, ok := b.(ed25519.PublicKey)
 		if !ok || len(x) != len(y) {

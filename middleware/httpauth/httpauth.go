@@ -159,7 +159,7 @@ func defaultErrorHandler(w http.ResponseWriter, _ *http.Request, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("WWW-Authenticate", `Bearer realm="jwtmint"`)
 	w.WriteHeader(status)
-	fmt.Fprintf(w, `{"error":"unauthorized","detail":%q}`, err.Error())
+	_, _ = fmt.Fprintf(w, `{"error":"unauthorized","detail":%q}`, err.Error())
 }
 
 // ClaimsFromContext returns the verified claims attached by Middleware, or nil if absent.

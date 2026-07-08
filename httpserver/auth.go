@@ -3,7 +3,6 @@ package httpserver
 import (
 	"crypto/subtle"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -58,21 +57,4 @@ func StaticBearerAuthenticator(expected string) Authenticator {
 		}
 		return nil
 	})
-}
-
-// extractBearer returns the token portion of "Authorization: Bearer <token>", or "" if absent.
-func extractBearer(r *http.Request) (string, error) {
-	authz := r.Header.Get("Authorization")
-	if authz == "" {
-		return "", fmt.Errorf("missing Authorization header")
-	}
-	const prefix = "Bearer "
-	if !strings.HasPrefix(authz, prefix) {
-		return "", fmt.Errorf("Authorization is not a Bearer token")
-	}
-	tok := strings.TrimSpace(strings.TrimPrefix(authz, prefix))
-	if tok == "" {
-		return "", fmt.Errorf("empty bearer token")
-	}
-	return tok, nil
 }

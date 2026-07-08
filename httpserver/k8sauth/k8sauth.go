@@ -96,7 +96,7 @@ func (a *SAAuthenticator) Authenticate(r *http.Request) error {
 	}
 	const prefix = "Bearer "
 	if !strings.HasPrefix(authz, prefix) {
-		return fmt.Errorf("Authorization is not a Bearer token")
+		return fmt.Errorf("authorization is not a bearer token")
 	}
 	token := strings.TrimSpace(strings.TrimPrefix(authz, prefix))
 	if token == "" {

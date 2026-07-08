@@ -179,14 +179,21 @@ func jwkFromECDSA(k *ecdsa.PublicKey, kid string) (JWK, error) {
 	if err != nil {
 		return JWK{}, err
 	}
+	point, err := k.Bytes()
+	if err != nil {
+		return JWK{}, fmt.Errorf("encode ecdsa public key: %w", err)
+	}
+	// Bytes returns the uncompressed SEC1 point 0x04 || X || Y, each coordinate byteLen bytes.
 	byteLen := (k.Curve.Params().BitSize + 7) / 8
+	x := point[1 : 1+byteLen]
+	y := point[1+byteLen:]
 	return JWK{
 		Kty: KeyTypeEC,
 		Kid: kid,
 		Use: UseSig,
 		Crv: crv,
-		X:   base64.RawURLEncoding.EncodeToString(leftPad(k.X.Bytes(), byteLen)),
-		Y:   base64.RawURLEncoding.EncodeToString(leftPad(k.Y.Bytes(), byteLen)),
+		X:   base64.RawURLEncoding.EncodeToString(x),
+		Y:   base64.RawURLEncoding.EncodeToString(y),
 	}, nil
 }
 
@@ -227,14 +234,4 @@ func nameFromCurve(c elliptic.Curve) (string, error) {
 	default:
 		return "", fmt.Errorf("%w: unsupported ec curve %v", pkgerr.ErrInvalidValue, c)
 	}
-}
-
-// leftPad returns b left-padded with zero bytes to length n. b is returned unchanged when len(b) >= n.
-func leftPad(b []byte, n int) []byte {
-	if len(b) >= n {
-		return b
-	}
-	out := make([]byte, n)
-	copy(out[n-len(b):], b)
-	return out
 }

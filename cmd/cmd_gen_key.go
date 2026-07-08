@@ -79,7 +79,7 @@ func runGenKey(algorithm, curve string, bits int, privOut, pubOut string, printP
 	if err := keys.SavePublicKey(pubOut, pub); err != nil {
 		return err
 	}
-	fmt.Fprintf(cobraStderr(), "wrote %s and %s\n", privOut, pubOut)
+	_, _ = fmt.Fprintf(cobraStderr(), "wrote %s and %s\n", privOut, pubOut)
 	return nil
 }
 

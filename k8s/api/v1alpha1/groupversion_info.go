@@ -13,6 +13,8 @@ import (
 var GroupVersion = schema.GroupVersion{Group: "jwtmint.io", Version: "v1alpha1"}
 
 // SchemeBuilder collects functions that add the v1alpha1 types to a scheme.
+//
+//nolint:staticcheck // Standard controller-runtime scheme registration idiom.
 var SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}
 
 // AddToScheme registers v1alpha1 types with the given scheme.

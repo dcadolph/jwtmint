@@ -27,7 +27,7 @@ func TestNewRoundTripperAttachesBearer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Do: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	if got != "Bearer abc-123" {
 		t.Errorf("Authorization header: want 'Bearer abc-123', got %q", got)
 	}

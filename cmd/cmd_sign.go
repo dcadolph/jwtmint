@@ -112,7 +112,7 @@ func runSign(f *signFlags) error {
 	if err != nil {
 		return err
 	}
-	fmt.Fprintln(cobraStdout(), signed)
+	_, _ = fmt.Fprintln(cobraStdout(), signed)
 	return nil
 }
 

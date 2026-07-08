@@ -241,7 +241,7 @@ func doRequest(t *testing.T, ts *httptest.Server, method, path, bearer string, b
 	if err != nil {
 		t.Fatalf("do: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	out, err := io.ReadAll(resp.Body)
 	if err != nil {
