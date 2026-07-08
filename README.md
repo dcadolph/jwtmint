@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="jwtmint.png" alt="jwtmint" width="240">
+</p>
+
 # jwtmint
 
 A JWT library for Go with a daemon, a Kubernetes controller, an admission webhook,
